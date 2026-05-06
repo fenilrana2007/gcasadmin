@@ -294,16 +294,11 @@ app.put('/api/admin/update/:id', upload.single('gcasfilelast'), async (req, res)
         
         // If a new final file is uploaded, update the object
         if (req.file) {
-            // updateData.gcasfilelast = {
-            //     path: req.file.path,
-            //     filename: req.file.filename,
-            //     uploadDate: new Date()
-            // };
-            updateData.gcasfilelast = {
-            url: req.file.path,
-            type: req.file.mimetype,
-             name: req.file.originalname,
-            uploadDate: new Date()
+                updateData.gcasfilelast = {
+                url: req.file.path, // Use 'url' to match your frontend logic
+                type: req.mimetype,
+                name: req.file.originalname,
+                uploadDate: new Date()
             };
         }
         

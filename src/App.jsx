@@ -86,25 +86,31 @@ const AdminPortal = () => {
     };
 
     const handleUpdate = async (id) => {
-        const data = new FormData();
-        Object.keys(editForm).forEach(key => {
-            if (key !== 'gcasfilelast' && key !== 'files' && key !== '_id' && key !== '__v') {
-                data.append(key, editForm[key] || '');
-            }
-        });
-        if (selectedFile) data.append('gcasfilelast', selectedFile);
-
-        try {
-            await axios.put(`${API_URL}/update/${id}`, data);
-            setEditId(null);
-            setSelectedFile(null);
-            fetchAll();
-            showToast("Application updated successfully!", "success");
-        } catch (err) { 
-            console.error(err);
-            showToast("Update failed. Please try again.", "error");
+    const data = new FormData();
+    
+    // Append all text fields
+    Object.keys(editForm).forEach(key => {
+        // Skip the file objects and internal mongo keys
+        if (!['gcasfilelast', 'files', '_id', '__v', 'createdAt'].includes(key)) {
+            data.append(key, editForm[key] || '');
         }
-    };
+    });
+
+    // Only append a new file if the user actually selected one
+    if (selectedFile) {
+        data.append('gcasfilelast', selectedFile);
+    }
+
+    try {
+        await axios.put(`${API_URL}/update/${id}`, data);
+        setEditId(null);
+        setSelectedFile(null);
+        fetchAll(); // Refresh to see the new link
+        showToast("Updated successfully!");
+    } catch (err) {
+        showToast("Update failed", "error");
+    }
+};
 
     const deleteRecord = async (id) => {
         if(window.confirm("⚠️ Are you sure you want to permanently delete this student record?")) {
@@ -449,29 +455,28 @@ const AdminPortal = () => {
                                                         <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])}/>
                                                     </div>
                                                 )}
-                                                {/* {app.gcasfilelast && (
-                                                    <a href={app.gcasfilelast.path} target="_blank" className="doc-link-final">
-                                                        <Link2 size={14} /> Final Confirmation
-                                                    </a>
-                                                )} */}
-                                                {(app.gcasfilelast?.url || app.gcasfilelast?.path) && (
-                                                <a 
-                                                  href={app.gcasfilelast?.url || app.gcasfilelast?.path} 
-                                                   target="_blank" 
-                                                  rel="noopener noreferrer"
-                                                   className="doc-link-final"
+                                                {/* Standardized Link Rendering */}
+                                                     {app.gcasfilelast && (app.gcasfilelast.url || app.gcasfilelast.path) && (
+                                                      <a 
+                                                         href={app.gcasfilelast.url || app.gcasfilelast.path} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="doc-link-final"
                                                       >
-                                                      {app.gcasfilelast?.type === "application/pdf" ? "📄" : "🖼️"} 
-                                                      <Link2 size={14} /> Final Confirmation
-                                                  </a>
-                                                )}
-                                            </div>
-                                        </td>
+                                                        {/* Visual indicator for file type */}
+                                                          {app.gcasfilelast.type?.includes("pdf") ? "📄" : "🖼️"} 
+                                                        <Link2 size={14} style={{ marginLeft: '4px' }} /> 
+                                                      <span>Final Confirmation</span>
+                                                       </a>
+                                                      )}
+                                               
+                                                      </div>
+                                                  </td>
 
-                                        <td>
-                                            <div className="action-buttons">
-                                                {editId === app._id ? (
-                                                    <>
+                                                   <td>
+                                                      <div className="action-buttons">
+                                                         {editId === app._id ? (
+                                                           <>
                                                         <button onClick={() => handleUpdate(app._id)} className="action-btn-save" title="Save">
                                                             <Save size={18}/>
                                                         </button>
