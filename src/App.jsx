@@ -462,6 +462,7 @@ const AdminPortal = () => {
                                                         target="_blank" 
                                                         rel="noopener noreferrer"
                                                         className="doc-link-final"
+                                                        style={{ color: '#2563eb', textDecoration: 'underline', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                                                       >
                                                         {/* Visual indicator for file type */}
                                                           {app.gcasfilelast.type?.includes("pdf") ? "📄" : "🖼️"} 

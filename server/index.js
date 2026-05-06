@@ -294,13 +294,12 @@ app.put('/api/admin/update/:id', upload.single('gcasfilelast'), async (req, res)
         
         // If a new final file is uploaded, update the object
         if (req.file) {
-                updateData.gcasfilelast = {
-                url: req.file.path, // Use 'url' to match your frontend logic
-                type: req.mimetype,
-                name: req.file.originalname,
-                uploadDate: new Date()
-            };
-        }
+    updateData.gcasfilelast = {
+        url: req.file.path, // This provides the clickable Cloudinary link
+        type: req.file.mimetype,
+        name: req.file.originalname
+    };
+}
         
         const updatedApp = await Application.findByIdAndUpdate(
             req.params.id,
