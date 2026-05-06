@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
@@ -143,7 +144,7 @@ const AdminPortal = () => {
             "12th Marksheet No": app.marksheet12Number || "N/A",
             "GCAS Username": app.gcasusername || "Pending",
             "GCAS Password": app.gcaspassword || "Pending",
-            "Final Document Link": app.gcasfilelast?.url || "Not Uploaded",
+            "Final Document Link": app.gcasfilelast?.path || "Not Uploaded",
             "Filled By": app.whofill || "---",
             "Medium": app.medium || "---",
             "Degree": app.degree || "---",
@@ -408,38 +409,38 @@ const AdminPortal = () => {
 
                                         <td>
                                             <div className="documents-list">
-                                                {app.files?.marksheet10?.[0]?.url && (
-                                                    <a href={app.files.marksheet10[0].url} target="_blank" className="doc-link">
+                                                {app.files?.marksheet10?.[0]?.path && (
+                                                    <a href={app.files.marksheet10[0].path} target="_blank" className="doc-link">
                                                         <File size={14} /> 10th Marksheet
                                                     </a>
                                                 )}
-                                                {app.files?.marksheet12?.[0]?.url && (
-                                                    <a href={app.files.marksheet12[0].url} target="_blank" className="doc-link">
+                                                {app.files?.marksheet12?.[0]?.path && (
+                                                    <a href={app.files.marksheet12[0].path} target="_blank" className="doc-link">
                                                         <File size={14} /> 12th Marksheet
                                                     </a>
                                                 )}
-                                                {app.files?.casteCert?.[0]?.url && (
-                                                    <a href={app.files.casteCert[0].url} target="_blank" className="doc-link">
+                                                {app.files?.casteCert?.[0]?.path && (
+                                                    <a href={app.files.casteCert[0].path} target="_blank" className="doc-link">
                                                         <File size={14} /> Caste Certificate
                                                     </a>
                                                 )}
-                                                {app.files?.nclCert?.[0]?.url && (
-                                                    <a href={app.files.nclCert[0].url} target="_blank" className="doc-link">
+                                                {app.files?.nclCert?.[0]?.path && (
+                                                    <a href={app.files.nclCert[0].path} target="_blank" className="doc-link">
                                                         <File size={14} /> Non-Creamy Layer
                                                     </a>
                                                 )}
-                                                {app.files?.leavingCert?.[0]?.url && (
-                                                    <a href={app.files.leavingCert[0].url} target="_blank" className="doc-link">
+                                                {app.files?.leavingCert?.[0]?.path && (
+                                                    <a href={app.files.leavingCert[0].path} target="_blank" className="doc-link">
                                                         <File size={14} /> Leaving Certificate
                                                     </a>
                                                 )}
-                                                {app.files?.incomeCert?.[0]?.url && (
-                                                    <a href={app.files.incomeCert[0].url} target="_blank" className="doc-link">
+                                                {app.files?.incomeCert?.[0]?.path && (
+                                                    <a href={app.files.incomeCert[0].path} target="_blank" className="doc-link">
                                                         <File size={14} /> Income Certificate
                                                     </a>
                                                 )}
-                                                {app.files?.photo?.[0]?.url && (
-                                                    <a href={app.files.photo[0].url} target="_blank" className="doc-link">
+                                                {app.files?.photo?.[0]?.path && (
+                                                    <a href={app.files.photo[0].path} target="_blank" className="doc-link">
                                                         <Image size={14} /> Passport Photo
                                                     </a>
                                                 )}
@@ -450,7 +451,7 @@ const AdminPortal = () => {
                                                     </div>
                                                 )}
                                                 {app.gcasfilelast && (
-                                                    <a href={app.gcasfilelast.url} target="_blank" className="doc-link-final">
+                                                    <a href={app.gcasfilelast.path} target="_blank" className="doc-link-final">
                                                         <Link2 size={14} /> Final Confirmation
                                                     </a>
                                                 )}
