@@ -153,10 +153,24 @@ cloudinary.config({
 // 3. STORAGE SETUP (Resource Type 'auto' allows PDFs and Images)
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
+    // params: {
+    //     folder: 'GCAS_Applications',
+    //     resource_type: 'auto',
+    //     allowed_formats: ['jpg', 'png', 'pdf', 'jpeg'],
+    // },
+    params: async (req, file) => {
+    let resourceType = 'image';
+
+    // If file is PDF → treat as RAW
+    if (file.mimetype === 'application/pdf') {
+        resourceType = 'raw';
+    }
+
+    return {
         folder: 'GCAS_Applications',
-        resource_type: 'auto',
-        allowed_formats: ['jpg', 'png', 'pdf', 'jpeg'],
+        resource_type: resourceType,
+        public_id: Date.now() + '-' + file.originalname,
+    };
     },
 });
 const upload = multer({ storage: storage });
@@ -205,7 +219,17 @@ app.post('/api/apply', upload.fields([
             email: req.body.email,
             adhar: req.body.adhar,
             marksheet12Number: marksheet12Number,
-            files: req.files,
+            //files: req.files,
+            files: Object.fromEntries(
+                    Object.entries(req.files || {}).map(([key, value]) => [
+                    key,
+                    value.map(file => ({
+                        url: file.path,
+                          type: file.mimetype,
+                        name: file.originalname
+                    }))
+                  ])  
+            ),
             whofill: req.body.whofill || "",
             timing: req.body.timing || "",
             date: req.body.date || new Date().toISOString().split('T')[0],
@@ -270,10 +294,16 @@ app.put('/api/admin/update/:id', upload.single('gcasfilelast'), async (req, res)
         
         // If a new final file is uploaded, update the object
         if (req.file) {
+            // updateData.gcasfilelast = {
+            //     path: req.file.path,
+            //     filename: req.file.filename,
+            //     uploadDate: new Date()
+            // };
             updateData.gcasfilelast = {
-                path: req.file.path,
-                filename: req.file.filename,
-                uploadDate: new Date()
+            url: req.file.path,
+            type: req.file.mimetype,
+             name: req.file.originalname,
+            uploadDate: new Date()
             };
         }
         
