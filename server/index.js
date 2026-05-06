@@ -293,11 +293,14 @@ app.put('/api/admin/update/:id', upload.single('gcasfilelast'), async (req, res)
         delete updateData.createdAt;
         
         // If a new final file is uploaded, update the object
-        if (req.file) {
+      // Inside app.put('/api/admin/update/:id', ...)
+if (req.file) {
     updateData.gcasfilelast = {
-        url: req.file.path, // This provides the clickable Cloudinary link
-        type: req.file.mimetype,
-        name: req.file.originalname
+        url: req.file.path,
+        // Fallback to checking the extension if mimetype is missing
+        type: req.file.mimetype || (req.file.originalname.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'),
+        name: req.file.originalname,
+        uploadDate: new Date()
     };
 }
         

@@ -457,19 +457,26 @@ const AdminPortal = () => {
                                                 )}
                                                 {/* Standardized Link Rendering */}
                                                      {app.gcasfilelast && (app.gcasfilelast.url || app.gcasfilelast.path) && (
-                                                      <a 
-                                                         href={app.gcasfilelast.url || app.gcasfilelast.path} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer"
-                                                        className="doc-link-final"
-                                                        style={{ color: '#2563eb', textDecoration: 'underline', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                                                      >
-                                                        {/* Visual indicator for file type */}
-                                                          {app.gcasfilelast.type?.includes("pdf") ? "📄" : "🖼️"} 
-                                                        <Link2 size={14} style={{ marginLeft: '4px' }} /> 
-                                                      <span>Final Confirmation</span>
-                                                       </a>
-                                                      )}
+    <a 
+        href={app.gcasfilelast.url || app.gcasfilelast.path} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="doc-link-final"
+        style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '6px', 
+            color: '#2563eb', 
+            fontWeight: '500',
+            textDecoration: 'none' 
+        }}
+    >
+        {/* If type is null, we check the name for '.pdf' as a fallback */}
+        {(app.gcasfilelast.type?.includes("pdf") || app.gcasfilelast.name?.endsWith(".pdf")) ? "📄" : "🖼️"} 
+        <Link2 size={14} /> 
+        <span>Final Confirmation</span>
+    </a>
+)}
                                                
                                                       </div>
                                                   </td>
