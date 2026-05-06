@@ -10,7 +10,7 @@ const AdminPortal = () => {
     const [editForm, setEditForm] = useState({});
     const [selectedFile, setSelectedFile] = useState(null);
 
-    const API_URL = "https://gcas-2t9t.onrender.com/api/admin";
+    const API_URL = "https://gcasadmin.onrender.com/api/admin";
 
     useEffect(() => { fetchAll(); }, []);
 
