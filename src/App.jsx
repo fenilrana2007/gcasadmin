@@ -32,35 +32,37 @@ const AdminPortal = () => {
 
     const API_URL = "https://gcasadmin.onrender.com/api/admin";
 
-    // Helper function to get full file URL
-    const getFileUrl = (filePath) => {
-        if (!filePath) return null;
+    // Helper function to get file URL from different possible structures
+    const getFileUrl = (fileData) => {
+        if (!fileData) return null;
         
-        // If it's already a full URL
-        if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
-            return filePath;
+        // Check if it has URL property (Cloudinary format)
+        if (fileData.url) {
+            return fileData.url;
         }
         
-        // If it's a Cloudinary path, construct the full URL
-        if (filePath.includes('cloudinary') || filePath.includes('res.cloudinary.com')) {
-            return filePath;
+        // Check if it has path property
+        if (fileData.path) {
+            return fileData.path;
         }
         
-        // For local paths or relative paths
-        if (filePath.startsWith('/')) {
-            return `https://gcasadmin.onrender.com${filePath}`;
+        // If it's a string directly
+        if (typeof fileData === 'string') {
+            return fileData;
         }
         
-        return filePath;
+        return null;
     };
 
-    // Open PDF in new tab
-    const openDocument = (filePath, fileName) => {
-        const fullUrl = getFileUrl(filePath);
-        if (fullUrl) {
-            window.open(fullUrl, '_blank', 'noopener,noreferrer');
+    // Open PDF/File in new tab
+    const openDocument = (fileData, fileName) => {
+        const fileUrl = getFileUrl(fileData);
+        
+        if (fileUrl) {
+            console.log('Opening file:', fileName, 'URL:', fileUrl);
+            window.open(fileUrl, '_blank', 'noopener,noreferrer');
         } else {
-            showToast("Document URL not available", "error");
+            showToast(`Unable to open ${fileName}: File URL not found`, "error");
         }
     };
 
@@ -81,6 +83,7 @@ const AdminPortal = () => {
         setLoading(true);
         try {
             const res = await axios.get(`${API_URL}/applications`);
+            console.log('Fetched applications:', res.data); // Debug log
             setApps(res.data);
             setFilteredApps(res.data);
             
@@ -119,22 +122,29 @@ const AdminPortal = () => {
 
     const handleUpdate = async (id) => {
         const data = new FormData();
+        
+        // Append all text fields from edit form
         Object.keys(editForm).forEach(key => {
-            if (key !== 'gcasfilelast' && key !== 'files' && key !== '_id' && key !== '__v') {
+            if (key !== 'gcasfilelast' && key !== 'files' && key !== '_id' && key !== '__v' && key !== 'url' && key !== 'path') {
                 data.append(key, editForm[key] || '');
             }
         });
-        if (selectedFile) data.append('gcasfilelast', selectedFile);
+        
+        // Append the new file if one was selected
+        if (selectedFile) {
+            data.append('gcasfilelast', selectedFile);
+        }
 
         try {
-            await axios.put(`${API_URL}/update/${id}`, data);
+            const response = await axios.put(`${API_URL}/update/${id}`, data);
+            console.log('Update response:', response.data);
             setEditId(null);
             setSelectedFile(null);
             fetchAll();
             showToast("Application updated successfully!", "success");
         } catch (err) { 
-            console.error(err);
-            showToast("Update failed. Please try again.", "error");
+            console.error("Update Error:", err);
+            showToast(err.response?.data?.error || "Update failed. Please try again.", "error");
         }
     };
 
@@ -175,7 +185,7 @@ const AdminPortal = () => {
             "12th Marksheet No": app.marksheet12Number || "N/A",
             "GCAS Username": app.gcasusername || "Pending",
             "GCAS Password": app.gcaspassword || "Pending",
-            "Final Document Link": app.gcasfilelast?.path || "Not Uploaded",
+            "Final Document Link": app.gcasfilelast?.url || app.gcasfilelast?.path || "Not Uploaded",
             "Filled By": app.whofill || "---",
             "Medium": app.medium || "---",
             "Degree": app.degree || "---",
@@ -235,7 +245,7 @@ const AdminPortal = () => {
                 </div>
             </div>
 
-            {/* Stats Cards - Full Width */}
+            {/* Stats Cards */}
             <div className="stats-grid">
                 <div className="stat-card">
                     <div className="stat-card-content">
@@ -433,52 +443,62 @@ const AdminPortal = () => {
 
                                         <td>
                                             <div className="documents-list">
-                                                {/* Debug: Log the file path */}
-                                                {console.log('File paths for', app.name, app.files?.marksheet12?.[0]?.path)}
-                                                
-                                                {app.files?.marksheet10?.[0]?.path && (
-                                                    <button onClick={() => openDocument(app.files.marksheet10[0].path, '10th Marksheet')} className="doc-link">
+                                                {/* Student Uploaded Documents */}
+                                                {app.files?.marksheet10?.[0] && (
+                                                    <button onClick={() => openDocument(app.files.marksheet10[0], '10th Marksheet')} className="doc-link">
                                                         <File size={14} /> 📄 10th Marksheet
                                                     </button>
                                                 )}
-                                                {app.files?.marksheet12?.[0]?.path && (
-                                                    <button onClick={() => openDocument(app.files.marksheet12[0].path, '12th Marksheet')} className="doc-link">
+                                                {app.files?.marksheet12?.[0] && (
+                                                    <button onClick={() => openDocument(app.files.marksheet12[0], '12th Marksheet')} className="doc-link">
                                                         <File size={14} /> 📄 12th Marksheet
                                                     </button>
                                                 )}
-                                                {app.files?.casteCert?.[0]?.path && (
-                                                    <button onClick={() => openDocument(app.files.casteCert[0].path, 'Caste Certificate')} className="doc-link">
+                                                {app.files?.casteCert?.[0] && (
+                                                    <button onClick={() => openDocument(app.files.casteCert[0], 'Caste Certificate')} className="doc-link">
                                                         <File size={14} /> 📜 Caste Certificate
                                                     </button>
                                                 )}
-                                                {app.files?.nclCert?.[0]?.path && (
-                                                    <button onClick={() => openDocument(app.files.nclCert[0].path, 'Non-Creamy Layer')} className="doc-link">
+                                                {app.files?.nclCert?.[0] && (
+                                                    <button onClick={() => openDocument(app.files.nclCert[0], 'Non-Creamy Layer')} className="doc-link">
                                                         <File size={14} /> ⭐ Non-Creamy Layer
                                                     </button>
                                                 )}
-                                                {app.files?.leavingCert?.[0]?.path && (
-                                                    <button onClick={() => openDocument(app.files.leavingCert[0].path, 'Leaving Certificate')} className="doc-link">
+                                                {app.files?.leavingCert?.[0] && (
+                                                    <button onClick={() => openDocument(app.files.leavingCert[0], 'Leaving Certificate')} className="doc-link">
                                                         <File size={14} /> 🎓 Leaving Certificate
                                                     </button>
                                                 )}
-                                                {app.files?.incomeCert?.[0]?.path && (
-                                                    <button onClick={() => openDocument(app.files.incomeCert[0].path, 'Income Certificate')} className="doc-link">
+                                                {app.files?.incomeCert?.[0] && (
+                                                    <button onClick={() => openDocument(app.files.incomeCert[0], 'Income Certificate')} className="doc-link">
                                                         <File size={14} /> 💰 Income Certificate
                                                     </button>
                                                 )}
-                                                {app.files?.photo?.[0]?.path && (
-                                                    <button onClick={() => openDocument(app.files.photo[0].path, 'Passport Photo')} className="doc-link">
+                                                {app.files?.photo?.[0] && (
+                                                    <button onClick={() => openDocument(app.files.photo[0], 'Passport Photo')} className="doc-link">
                                                         <Image size={14} /> 📸 Passport Photo
                                                     </button>
                                                 )}
+                                                
+                                                {/* Final Document Upload Section */}
                                                 {editId === app._id && (
                                                     <div className="upload-doc">
                                                         <label>Upload Final Document</label>
-                                                        <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])}/>
+                                                        <input 
+                                                            type="file" 
+                                                            className="file-input"
+                                                            accept=".pdf,.jpg,.jpeg,.png"
+                                                            onChange={(e) => setSelectedFile(e.target.files[0])}
+                                                        />
                                                     </div>
                                                 )}
+                                                
+                                                {/* Final Confirmation Document - Fixed to use url property */}
                                                 {app.gcasfilelast && (
-                                                    <button onClick={() => openDocument(app.gcasfilelast.path, 'Final Confirmation')} className="doc-link-final">
+                                                    <button 
+                                                        onClick={() => openDocument(app.gcasfilelast, 'Final Confirmation')} 
+                                                        className="doc-link-final"
+                                                    >
                                                         <Link2 size={14} /> ✅ Final Confirmation
                                                     </button>
                                                 )}
@@ -541,70 +561,6 @@ const AdminPortal = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Add Application Modal */}
-            {showAddModal && (
-                <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-                    <div className="modal-container" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2 className="modal-title"><Plus size={20} /> Add New Application</h2>
-                            <button onClick={() => setShowAddModal(false)} className="modal-close"><X size={20}/></button>
-                        </div>
-                        <div className="modal-body">
-                            <div className="form-grid">
-                                <div className="form-field">
-                                    <label>Full Name *</label>
-                                    <input type="text" value={newApplication.name} onChange={(e) => setNewApplication({...newApplication, name: e.target.value})} />
-                                </div>
-                                <div className="form-field">
-                                    <label>Mobile Number *</label>
-                                    <input type="tel" value={newApplication.mobile} onChange={(e) => setNewApplication({...newApplication, mobile: e.target.value})} />
-                                </div>
-                                <div className="form-field">
-                                    <label>Email *</label>
-                                    <input type="email" value={newApplication.email} onChange={(e) => setNewApplication({...newApplication, email: e.target.value})} />
-                                </div>
-                                <div className="form-field">
-                                    <label>Aadhar Number *</label>
-                                    <input type="text" value={newApplication.adhar} onChange={(e) => setNewApplication({...newApplication, adhar: e.target.value})} />
-                                </div>
-                                <div className="form-field">
-                                    <label>Filled By</label>
-                                    <input type="text" value={newApplication.whofill} onChange={(e) => setNewApplication({...newApplication, whofill: e.target.value})} />
-                                </div>
-                                <div className="form-field">
-                                    <label>Degree</label>
-                                    <input type="text" value={newApplication.degree} onChange={(e) => setNewApplication({...newApplication, degree: e.target.value})} />
-                                </div>
-                                <div className="form-field">
-                                    <label>Medium</label>
-                                    <input type="text" value={newApplication.medium} onChange={(e) => setNewApplication({...newApplication, medium: e.target.value})} />
-                                </div>
-                                <div className="form-field">
-                                    <label>Date</label>
-                                    <input type="date" value={newApplication.date} onChange={(e) => setNewApplication({...newApplication, date: e.target.value})} />
-                                </div>
-                                <div className="form-field">
-                                    <label>Timing</label>
-                                    <input type="time" value={newApplication.timing} onChange={(e) => setNewApplication({...newApplication, timing: e.target.value})} />
-                                </div>
-                                <div className="form-field">
-                                    <label>GCAS Username</label>
-                                    <input type="text" value={newApplication.gcasusername} onChange={(e) => setNewApplication({...newApplication, gcasusername: e.target.value})} />
-                                </div>
-                                <div className="form-field">
-                                    <label>GCAS Password</label>
-                                    <input type="text" value={newApplication.gcaspassword} onChange={(e) => setNewApplication({...newApplication, gcaspassword: e.target.value})} />
-                                </div>
-                            </div>
-                            <div className="modal-actions">
-                                <button onClick={() => setShowAddModal(false)} className="btn-cancel">Cancel</button>
-                                <button onClick={handleAddApplication} className="btn-submit">Add Application</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
