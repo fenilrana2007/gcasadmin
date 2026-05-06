@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
@@ -32,6 +31,38 @@ const AdminPortal = () => {
     });
 
     const API_URL = "https://gcasadmin.onrender.com/api/admin";
+
+    // Helper function to get full file URL
+    const getFileUrl = (filePath) => {
+        if (!filePath) return null;
+        
+        // If it's already a full URL
+        if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+            return filePath;
+        }
+        
+        // If it's a Cloudinary path, construct the full URL
+        if (filePath.includes('cloudinary') || filePath.includes('res.cloudinary.com')) {
+            return filePath;
+        }
+        
+        // For local paths or relative paths
+        if (filePath.startsWith('/')) {
+            return `https://gcasadmin.onrender.com${filePath}`;
+        }
+        
+        return filePath;
+    };
+
+    // Open PDF in new tab
+    const openDocument = (filePath, fileName) => {
+        const fullUrl = getFileUrl(filePath);
+        if (fullUrl) {
+            window.open(fullUrl, '_blank', 'noopener,noreferrer');
+        } else {
+            showToast("Document URL not available", "error");
+        }
+    };
 
     useEffect(() => { 
         fetchAll(); 
@@ -194,9 +225,6 @@ const AdminPortal = () => {
                     </div>
                     
                     <div className="header-actions">
-                        {/* <button onClick={() => setShowAddModal(true)} className="btn btn-primary">
-                            <Plus size={18}/> Add Application
-                        </button> */}
                         <button onClick={exportToExcel} className="btn btn-success">
                             <Download size={18}/> Export Excel
                         </button>
@@ -248,7 +276,6 @@ const AdminPortal = () => {
             <div className="search-section">
                 <div className="search-card">
                     <div className="search-controls">
-                        {/* Search Type Selector - Removed Marksheet */}
                         <div className="search-type-group">
                             <label className="search-label">Search By</label>
                             <div className="search-type-buttons">
@@ -267,7 +294,6 @@ const AdminPortal = () => {
                             </div>
                         </div>
 
-                        {/* Search Input */}
                         <div className="search-input-group">
                             <label className="search-label">
                                 {searchType === 'name' ? 'Student Name' : 'Mobile Number'}
@@ -289,7 +315,6 @@ const AdminPortal = () => {
                             </div>
                         </div>
 
-                        {/* Status Filter */}
                         <div className="filter-group">
                             <label className="search-label">Status Filter</label>
                             <select value={selectedFilter} onChange={(e) => setSelectedFilter(e.target.value)} className="filter-select">
@@ -300,7 +325,6 @@ const AdminPortal = () => {
                         </div>
                     </div>
 
-                    {/* Search Results Info */}
                     {searchTerm && (
                         <div className="search-results-info">
                             <div className="search-results-text">
@@ -313,7 +337,7 @@ const AdminPortal = () => {
                 </div>
             </div>
 
-            {/* Main Table Container - Full Width */}
+            {/* Main Table Container */}
             <div className="table-container">
                 <div className="data-table-wrapper">
                     <div className="overflow-x-auto">
@@ -409,40 +433,43 @@ const AdminPortal = () => {
 
                                         <td>
                                             <div className="documents-list">
+                                                {/* Debug: Log the file path */}
+                                                {console.log('File paths for', app.name, app.files?.marksheet12?.[0]?.path)}
+                                                
                                                 {app.files?.marksheet10?.[0]?.path && (
-                                                    <a href={app.files.marksheet10[0].path} target="_blank" className="doc-link">
-                                                        <File size={14} /> 10th Marksheet
-                                                    </a>
+                                                    <button onClick={() => openDocument(app.files.marksheet10[0].path, '10th Marksheet')} className="doc-link">
+                                                        <File size={14} /> 📄 10th Marksheet
+                                                    </button>
                                                 )}
                                                 {app.files?.marksheet12?.[0]?.path && (
-                                                    <a href={app.files.marksheet12[0].path} target="_blank" className="doc-link">
-                                                        <File size={14} /> 12th Marksheet
-                                                    </a>
+                                                    <button onClick={() => openDocument(app.files.marksheet12[0].path, '12th Marksheet')} className="doc-link">
+                                                        <File size={14} /> 📄 12th Marksheet
+                                                    </button>
                                                 )}
                                                 {app.files?.casteCert?.[0]?.path && (
-                                                    <a href={app.files.casteCert[0].path} target="_blank" className="doc-link">
-                                                        <File size={14} /> Caste Certificate
-                                                    </a>
+                                                    <button onClick={() => openDocument(app.files.casteCert[0].path, 'Caste Certificate')} className="doc-link">
+                                                        <File size={14} /> 📜 Caste Certificate
+                                                    </button>
                                                 )}
                                                 {app.files?.nclCert?.[0]?.path && (
-                                                    <a href={app.files.nclCert[0].path} target="_blank" className="doc-link">
-                                                        <File size={14} /> Non-Creamy Layer
-                                                    </a>
+                                                    <button onClick={() => openDocument(app.files.nclCert[0].path, 'Non-Creamy Layer')} className="doc-link">
+                                                        <File size={14} /> ⭐ Non-Creamy Layer
+                                                    </button>
                                                 )}
                                                 {app.files?.leavingCert?.[0]?.path && (
-                                                    <a href={app.files.leavingCert[0].path} target="_blank" className="doc-link">
-                                                        <File size={14} /> Leaving Certificate
-                                                    </a>
+                                                    <button onClick={() => openDocument(app.files.leavingCert[0].path, 'Leaving Certificate')} className="doc-link">
+                                                        <File size={14} /> 🎓 Leaving Certificate
+                                                    </button>
                                                 )}
                                                 {app.files?.incomeCert?.[0]?.path && (
-                                                    <a href={app.files.incomeCert[0].path} target="_blank" className="doc-link">
-                                                        <File size={14} /> Income Certificate
-                                                    </a>
+                                                    <button onClick={() => openDocument(app.files.incomeCert[0].path, 'Income Certificate')} className="doc-link">
+                                                        <File size={14} /> 💰 Income Certificate
+                                                    </button>
                                                 )}
                                                 {app.files?.photo?.[0]?.path && (
-                                                    <a href={app.files.photo[0].path} target="_blank" className="doc-link">
-                                                        <Image size={14} /> Passport Photo
-                                                    </a>
+                                                    <button onClick={() => openDocument(app.files.photo[0].path, 'Passport Photo')} className="doc-link">
+                                                        <Image size={14} /> 📸 Passport Photo
+                                                    </button>
                                                 )}
                                                 {editId === app._id && (
                                                     <div className="upload-doc">
@@ -451,9 +478,9 @@ const AdminPortal = () => {
                                                     </div>
                                                 )}
                                                 {app.gcasfilelast && (
-                                                    <a href={app.gcasfilelast.path} target="_blank" className="doc-link-final">
-                                                        <Link2 size={14} /> Final Confirmation
-                                                    </a>
+                                                    <button onClick={() => openDocument(app.gcasfilelast.path, 'Final Confirmation')} className="doc-link-final">
+                                                        <Link2 size={14} /> ✅ Final Confirmation
+                                                    </button>
                                                 )}
                                             </div>
                                         </td>
