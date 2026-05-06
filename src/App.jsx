@@ -449,10 +449,21 @@ const AdminPortal = () => {
                                                         <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])}/>
                                                     </div>
                                                 )}
-                                                {app.gcasfilelast && (
+                                                {/* {app.gcasfilelast && (
                                                     <a href={app.gcasfilelast.path} target="_blank" className="doc-link-final">
                                                         <Link2 size={14} /> Final Confirmation
                                                     </a>
+                                                )} */}
+                                                {(app.gcasfilelast?.url || app.gcasfilelast?.path) && (
+                                                <a 
+                                                  href={app.gcasfilelast?.url || app.gcasfilelast?.path} 
+                                                   target="_blank" 
+                                                  rel="noopener noreferrer"
+                                                   className="doc-link-final"
+                                                      >
+                                                      {app.gcasfilelast?.type === "application/pdf" ? "📄" : "🖼️"} 
+                                                      <Link2 size={14} /> Final Confirmation
+                                                  </a>
                                                 )}
                                             </div>
                                         </td>
