@@ -189,6 +189,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
+import './App.css';
 import { 
     Search, Download, Edit, Save, Trash2, ExternalLink, X, 
     CheckCircle, Clock, Users, FileText, AlertCircle, 
