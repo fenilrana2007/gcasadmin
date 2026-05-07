@@ -125,6 +125,7 @@
 // app.listen(PORT, '0.0.0.0', () => {
 //     console.log(`Server is running on port ${PORT}`);
 // });
+//all done, now let's run the server
 const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
