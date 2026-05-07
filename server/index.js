@@ -169,7 +169,7 @@ const storage = new CloudinaryStorage({
 
     return {
         folder: 'GCAS_Applications',
-        resource_type: resourceType,
+        resource_type: "auto",
         public_id: Date.now() + '-' + file.originalname,
     };
     },
@@ -221,16 +221,17 @@ app.post('/api/apply', upload.fields([
             adhar: req.body.adhar,
             marksheet12Number: marksheet12Number,
             //files: req.files,
-            files: Object.fromEntries(
-                    Object.entries(req.files || {}).map(([key, value]) => [
-                    key,
-                    value.map(file => ({
-                        url: file.path,
-                          type: file.mimetype,
-                        name: file.originalname
-                    }))
-                  ])  
-            ),
+            // files: Object.fromEntries(
+            //         Object.entries(req.files || {}).map(([key, value]) => [
+            //         key,
+            //         value.map(file => ({
+            //             url: file.path,
+            //               type: file.mimetype,
+            //             name: file.originalname
+            //         }))
+            //       ])  
+            // ),
+            files: Object.fromEntries( Object.entries(req.files || {}).map(([key, value]) => [ key, value.map(file => ({ url: file.path, type: file.mimetype, name: file.originalname })) ]) ),
             whofill: req.body.whofill || "",
             timing: req.body.timing || "",
             date: req.body.date || new Date().toISOString().split('T')[0],
@@ -295,11 +296,23 @@ app.put('/api/admin/update/:id', upload.single('gcasfilelast'), async (req, res)
         
         // If a new final file is uploaded, update the object
       // Inside app.put('/api/admin/update/:id', ...)
+// if (req.file) {
+//     updateData.gcasfilelast = {
+//         url: req.file.path,
+//         // Fallback to checking the extension if mimetype is missing
+//         type: req.file.mimetype || (req.file.originalname.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'),
+//         name: req.file.originalname,
+//         uploadDate: new Date()
+//     };
+// }
 if (req.file) {
     updateData.gcasfilelast = {
-        url: req.file.path,
-        // Fallback to checking the extension if mimetype is missing
-        type: req.file.mimetype || (req.file.originalname.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'),
+        url: req.file.secure_url || req.file.path,
+        type:
+            req.file.mimetype ||
+            (req.file.originalname.endsWith('.pdf')
+                ? 'application/pdf'
+                : 'image/jpeg'),
         name: req.file.originalname,
         uploadDate: new Date()
     };

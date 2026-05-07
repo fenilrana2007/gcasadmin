@@ -455,28 +455,36 @@ const AdminPortal = () => {
                                                         <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])}/>
                                                     </div>
                                                 )}
-                                                {/* Standardized Link Rendering */}
-                                                     {app.gcasfilelast && (app.gcasfilelast.url || app.gcasfilelast.path) && (
-    <a 
-        href={app.gcasfilelast.url || app.gcasfilelast.path} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="doc-link-final"
-        style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '6px', 
-            color: '#2563eb', 
-            fontWeight: '500',
-            textDecoration: 'none' 
-        }}
-    >
-        {/* If type is null, we check the name for '.pdf' as a fallback */}
-        {(app.gcasfilelast.type?.includes("pdf") || app.gcasfilelast.name?.endsWith(".pdf")) ? "📄" : "🖼️"} 
-        <Link2 size={14} /> 
-        <span>Final Confirmation</span>
-    </a>
-)}
+                                                {app.gcasfilelast && (app.gcasfilelast.url || app.gcasfilelast.path) && (() => {
+
+    let fileUrl = app.gcasfilelast.url || app.gcasfilelast.path;
+
+    // Fix Cloudinary raw PDF URL
+    if (fileUrl.includes("/raw/upload/") && fileUrl.endsWith(".pdf")) {
+        fileUrl = fileUrl.replace("/raw/upload/", "/image/upload/fl_attachment:false/");
+    }
+
+    return (
+        <a
+            href={fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="doc-link-final"
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                color: '#2563eb',
+                fontWeight: '500',
+                textDecoration: 'none'
+            }}
+        >
+            {(fileUrl.includes(".pdf")) ? "📄" : "🖼️"}
+            <Link2 size={14} />
+            <span>Final Confirmation</span>
+        </a>
+    );
+})()}
                                                
                                                       </div>
                                                   </td>
