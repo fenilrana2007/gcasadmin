@@ -152,26 +152,36 @@ cloudinary.config({
 });
 
 // 3. STORAGE SETUP (Resource Type 'auto' allows PDFs and Images)
+// const storage = new CloudinaryStorage({
+//     cloudinary: cloudinary,
+//     // params: {
+//     //     folder: 'GCAS_Applications',
+//     //     resource_type: 'auto',
+//     //     allowed_formats: ['jpg', 'png', 'pdf', 'jpeg'],
+//     // },
+//     params: async (req, file) => {
+//     let resourceType = 'image';
+
+//     // If file is PDF → treat as RAW
+//     if (file.mimetype === 'application/pdf') {
+//         resourceType = 'raw';
+//     }
+
+//     return {
+//         folder: 'GCAS_Applications',
+//         resource_type: "auto",
+//         public_id: Date.now() + '-' + file.originalname,
+//     };
+//     },
+// });
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    // params: {
-    //     folder: 'GCAS_Applications',
-    //     resource_type: 'auto',
-    //     allowed_formats: ['jpg', 'png', 'pdf', 'jpeg'],
-    // },
     params: async (req, file) => {
-    let resourceType = 'image';
-
-    // If file is PDF → treat as RAW
-    if (file.mimetype === 'application/pdf') {
-        resourceType = 'raw';
-    }
-
-    return {
-        folder: 'GCAS_Applications',
-        resource_type: "auto",
-        public_id: Date.now() + '-' + file.originalname,
-    };
+        return {
+            folder: 'GCAS_Applications',
+            resource_type: 'auto',
+            public_id: Date.now() + '-' + file.originalname.replace(/\.[^/.]+$/, "")
+        };
     },
 });
 const upload = multer({ storage: storage });

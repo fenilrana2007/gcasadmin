@@ -657,11 +657,15 @@ input, select, textarea {
     transition: all 0.2s ease;
 }
 
-input:focus, select:focus, textarea:focus {
+/* input:focus, select:focus, textarea:focus {
     outline: none;
     ring: 2px solid #3b82f6;
+} */
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
 }
-
 /* Button Styles */
 button {
     cursor: pointer;
@@ -1077,12 +1081,16 @@ kbd {
     font-size: 0.875rem;
 }
 
-.form-field input:focus {
+/* .form-field input:focus {
     outline: none;
     border-color: #3b82f6;
     ring: 2px solid #93c5fd;
+} */
+.form-field input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(147, 197, 253, 0.4);
 }
-
 .modal-actions {
     display: flex;
     justify-content: flex-end;
