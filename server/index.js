@@ -223,28 +223,38 @@ app.put('/api/admin/update/:id', upload.single('gcasfilelast'), async (req, res)
         
         // If a new final file is uploaded, update the object
       // Inside app.put('/api/admin/update/:id', ...)
-// if (req.file) {
-//     updateData.gcasfilelast = {
-//         url: req.file.path,
-//         // Fallback to checking the extension if mimetype is missing
-//         type: req.file.mimetype || (req.file.originalname.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'),
-//         name: req.file.originalname,
-//         uploadDate: new Date()
-//     };
-// }
 if (req.file) {
+
+    const result = await new Promise((resolve, reject) => {
+
+        const stream = cloudinary.uploader.upload_stream(
+            {
+                folder: "GCAS_Applications",
+                resource_type: "auto",
+                public_id:
+                    Date.now() +
+                    "-" +
+                    req.file.originalname.replace(/\.[^/.]+$/, "")
+            },
+            (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+            }
+        );
+
+        streamifier
+            .createReadStream(req.file.buffer)
+            .pipe(stream);
+
+    });
+
     updateData.gcasfilelast = {
-        url: req.file.secure_url || req.file.path,
-        type:
-            req.file.mimetype ||
-            (req.file.originalname.endsWith('.pdf')
-                ? 'application/pdf'
-                : 'image/jpeg'),
+        url: result.secure_url,
+        type: req.file.mimetype,
         name: req.file.originalname,
         uploadDate: new Date()
     };
-}
-        
+}        
         const updatedApp = await Application.findByIdAndUpdate(
             req.params.id,
             updateData,
